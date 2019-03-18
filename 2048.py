@@ -2,7 +2,8 @@
 import random
 import curses
 from itertools import chain
-
+from random import randrange, choice
+from collections import defaultdict
 
 class Action(object):
 
