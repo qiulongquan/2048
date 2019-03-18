@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import random
 import six
+from random import randrange, choice  # generate and place new tile
 
 def init1():
     print("1")
@@ -62,19 +63,23 @@ actions = ['Up', 'Left', 'Down', 'Right', 'Restart', 'Exit']
 actions_dict = dict(zip(letter_codes, actions * 2))
 print(actions_dict)
 
-char = "W"
-if char in actions_dict:
-    print("ok")
+# char = '83'
+# if char in actions_dict:
+#     print("ok")
+#
+# for ch in actions_dict:
+#     # int和bytes的转换用six类库把 int转成bytes得到b，然后把b转换成string。
+#     b = six.int2byte(ch)
+#     str1 = str(b, 'utf-8')
+#     print(str1)
+#     if 'W' == str1:
+#         print('我是W')
+#
+# # 字典里面的key是可以in操作的，可以指定一个字符在字典里面查找是否存在。
+# a={'A':'1','B':'2','C':'3','D':'4'}
+# aa='B'
+# print(aa in a)
 
-for ch in actions_dict:
-    # int和bytes的转换用six类库把 int转成bytes得到b，然后把b转换成string。
-    b = six.int2byte(ch)
-    str1 = str(b, 'utf-8')
-    print(str1)
-    if 'W' == str1:
-        print('我是W')
-
-# 字典里面的key是可以in操作的，可以指定一个字符在字典里面查找是否存在。
-a={'A':'1','B':'2','C':'3','D':'4'}
-aa='B'
-print(aa in a)
+actions1 = ['Up', 'Left', 'Down', 'Right']
+direction = choice(actions1)
+print("方向操作:", direction)
