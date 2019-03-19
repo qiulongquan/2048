@@ -26,6 +26,7 @@ battle_id	ver float	batle_time  datatime	score  int	result   string
 对战盘的ID	当次步数		新增加数字值为（2或者4） 	新增加数字的位置 	
 battle_id  int	sept  int       new_digital   int     	coordinate  char	
 
-当次执行的方向       	执行前的各点的数字（一个2维数组）     	执行后的各点的数字（一个2维数组）	
-Direction  string	digital_set_before  list 	digital_set_after  list
+当次执行的方向       	执行前的各点的数字（一个2维数组）	执行后的各点的数字（一个2维数组）	
+Direction  string	digital_set_before  list	digital_set_after  list
+
 ```
