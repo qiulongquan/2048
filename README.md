@@ -20,8 +20,8 @@
 数据放入数据库保存 使用sqlite3 文件数据库
 放入数据库字段 
 对战记录表 record
-对战盘的ID	策略版本		对战时间       		分数		  胜利分数条件		宽度			高度			 失败或者胜利
-battle_id	ver string	batle_time  datatime	score  int	  win_score  int	width  string	high  string	 result   string
+对战盘的ID	策略版本		对战时间       		分数		  胜利分数条件		宽度			高度			失败或者胜利
+battle_id	ver string	batle_time  datatime	score  int	  win_score  int	width  string	high  string	result   string
 每盘步数记录表 operation
 对战盘的ID	当次步数		新增加数字值为（2或者4） 	新增加数字的位置 	
 battle_id  int	sept  int       new_digital   int     	coordinate  char	
