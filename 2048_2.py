@@ -11,6 +11,10 @@ letter_codes = [ord(ch) for ch in 'RQrq']
 actions = ['Restart', 'Exit']
 actions_dict = dict(zip(letter_codes, actions * 2))
 actions1 = ['Up', 'Left', 'Down', 'Right']
+# 步数 当前是策略的第几步
+step=0
+# 当前的对战id号
+battle_id=0
 
 # 链接sqlite3数据库
 dbname = 'operation.sqlite3'
@@ -22,7 +26,7 @@ c = conn.cursor()
 f = open('operation_log.txt', 'a+')
 
 
-def write_file(height='', width='', win='',field=''):
+def write_file(height='', width='', win='',field = ''):
     header = "height={}   width={}    win={}".format(height, width, win)
     f.write(header + "\n")
     #  4*4的数组里面的数字变换成文字列然后写入文件
@@ -38,9 +42,30 @@ def write_file(height='', width='', win='',field=''):
 
 # 操作数据和每个方格的数字信息写入文件数据库sqlite3  name为 operation.sqlite3
 
-def write_file_to_sqlite3(height='', width='', win='', field=''):
-    header = "height={}   width={}    win={}".format(height, width, win)
+def write_file_to_operation(battle_id,step=0,action='',field_before='',field_after=''):
     #  4*4的数组里面的数字变换成文字列然后写入文件
+    row_str = ''
+    row_str_all = ''
+    for row in field:
+        for i in range(len(row)):
+            maped_num = map(str, row)  # 格納される数値を文字列にする
+            row_str = ','.join(maped_num)
+        row_str_all += " "+row_str
+
+    sql = 'insert into operation (' \
+          'battle_id,' \
+          'step,' \
+          'new_digital,' \
+          'coordinate,' \
+          'Direction,' \
+          'digital_set_before,' \
+          'digital_set_after' \
+          ') values (?,?,?,?,?,?,?)'
+    record = (battle_id,1,2,'','',row_str_all,'')
+    c.execute(sql, record)
+    conn.commit()
+
+def write_file_to_record(battle_id=0,ver='', batle_time=time.localtime(), score=0,win_score=2048, width='4',height='4',result=''):
     row_str = ''
     row_str_all = ''
     for row in field:
@@ -62,6 +87,22 @@ def write_file_to_sqlite3(height='', width='', win='', field=''):
     c.execute(sql, record)
     conn.commit()
 
+# 获取得分最多的时候的分数
+def get_highscore():
+    sql='select max(score) from record;'
+    highscore=c.execute(sql)
+    if highscore is None or highscore=='':
+        highscore=0
+    return highscore
+
+def get_battle_id():
+    sql = 'select max(battle_id) from record;'
+    battle_id = c.execute(sql)
+    if battle_id is None or battle_id == '':
+        battle_id = 1
+    else:
+        battle_id += 1
+    return battle_id
 
 # 键盘值的获取，如果不在actions_dict里面就继续监听按键，如果在actions_dict里面就返回对应的操作。
 def get_user_action(keyboard):
@@ -93,13 +134,15 @@ class GameField(object):
         self.reset()
 
     def reset(self):
-        if self.score > self.highscore:
-            self.highscore = self.score
+        self.highscore = get_highscore()
         self.score = 0
+        global step
+        step=0
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
-
-        write_file(field=self.field)
-        write_file_to_sqlite3(field=self.field)
+        # 获取的初期field的数值写入文件和数据库
+        battle_id = get_battle_id()
+        write_file(height=str(self.height), width=str(self.width), win='2048',field=self.field)
+        write_file_to_record(battle_id,ver='1.0',win_score=2048,width=str(self.width),height=str(self.height))
 
         self.spawn()
         self.spawn()
@@ -261,6 +304,10 @@ def main(stdscr):
             return 'Exit'
         if game_field.move(action): # move successful
             game_field.out(stdscr,action)
+            # 操作方向和更新前后的field写入数据库
+            global step
+            step += 1
+            write_file_to_operation(battle_id,step,action, field_before=self.field,field_after=self.field)
             if game_field.is_win():
                 return 'Win'
             if game_field.is_gameover():
@@ -279,7 +326,6 @@ def main(stdscr):
 
     # 设置终结状态最大数值为 32
     game_field = GameField(win=2048)
-
 
     state = 'Init'
 

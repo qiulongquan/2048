@@ -10,8 +10,8 @@ with closing(sqlite3.connect(dbname)) as conn:
 
     # executeメソッドでSQL文を実行する
     create_table = '''create table IF NOT EXISTS record (
-                        battle_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                        ver float,
+                        battle_id INTEGER PRIMARY KEY, 
+                        ver CHAR(20),
                         batle_time datetime, 
                         score INTEGER,
                         result CHAR(50)
