@@ -1,7 +1,9 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 import curses
 import time
+import sqlite3
+from contextlib import closing
 from random import randrange, choice  # generate and place new tile
 from collections import defaultdict
 
@@ -9,6 +11,57 @@ letter_codes = [ord(ch) for ch in 'RQrq']
 actions = ['Restart', 'Exit']
 actions_dict = dict(zip(letter_codes, actions * 2))
 actions1 = ['Up', 'Left', 'Down', 'Right']
+
+# 链接sqlite3数据库
+dbname = 'operation.sqlite3'
+conn = sqlite3.connect(dbname)
+c = conn.cursor()
+
+
+# 操作数据和每个方格的数字信息写入文件
+f = open('operation_log.txt', 'a+')
+
+
+def write_file(height='', width='', win='',field=''):
+    header = "height={}   width={}    win={}".format(height, width, win)
+    f.write(header + "\n")
+    #  4*4的数组里面的数字变换成文字列然后写入文件
+    f.write("\n")
+    row_str = ''
+    for row in field:
+        for i in range(len(row)):
+            maped_num = map(str, row)  # 格納される数値を文字列にする
+            row_str = ','.join(maped_num)
+        f.write(row_str + "\n")
+    f.write("\n"+"="*60+"\n")
+
+
+# 操作数据和每个方格的数字信息写入文件数据库sqlite3  name为 operation.sqlite3
+
+def write_file_to_sqlite3(height='', width='', win='', field=''):
+    header = "height={}   width={}    win={}".format(height, width, win)
+    #  4*4的数组里面的数字变换成文字列然后写入文件
+    row_str = ''
+    row_str_all = ''
+    for row in field:
+        for i in range(len(row)):
+            maped_num = map(str, row)  # 格納される数値を文字列にする
+            row_str = ','.join(maped_num)
+        row_str_all += " "+row_str
+
+    sql = 'insert into operation (' \
+          'battle_id,' \
+          'sept,' \
+          'new_digital,' \
+          'coordinate,' \
+          'Direction,' \
+          'digital_set_before,' \
+          'digital_set_after' \
+          ') values (?,?,?,?,?,?,?)'
+    record = (1,1,2,'','',row_str_all,'')
+    c.execute(sql, record)
+    conn.commit()
+
 
 # 键盘值的获取，如果不在actions_dict里面就继续监听按键，如果在actions_dict里面就返回对应的操作。
 def get_user_action(keyboard):
@@ -31,6 +84,7 @@ def invert(field):
 
 class GameField(object):
     def __init__(self, height=4, width=4, win=2048):
+        write_file(height=4, width=4, win=2048)
         self.height = height
         self.width = width
         self.win_value = win
@@ -43,6 +97,10 @@ class GameField(object):
             self.highscore = self.score
         self.score = 0
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
+
+        write_file(field=self.field)
+        write_file_to_sqlite3(field=self.field)
+
         self.spawn()
         self.spawn()
 
@@ -121,6 +179,10 @@ class GameField(object):
         cast('SCORE: ' + str(self.score))
         if 0 != self.highscore:
             cast('HIGHSCORE: ' + str(self.highscore))
+
+        write_file(field=self.field)
+        write_file_to_sqlite3(field=self.field)
+
         for row in self.field:
             draw_hor_separator()
             draw_row(row)
@@ -171,6 +233,7 @@ class GameField(object):
             return False
 
 def main(stdscr):
+
     def init():
         #重置游戏棋盘
         game_field.reset()
@@ -223,6 +286,8 @@ def main(stdscr):
     #状态机开始循环
     while state != 'Exit':
         state = state_actions[state]()
+    f.close()
+    conn.close()
 
 
 curses.wrapper(main)

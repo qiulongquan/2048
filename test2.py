@@ -8,7 +8,6 @@ def curses_main(args):
     w = curses.initscr()
     curses.echo()
     while 1:
-        time.sleep(1)
         w.addstr(0, 0, ">")
         w.clrtoeol()
         s = w.getstr()
@@ -16,6 +15,8 @@ def curses_main(args):
         if str1=='q':break
         w.insertln()
         w.addstr(1, 0, "[" + str(s) + "]")
+        f = open('log.txt', 'a+')
+        f.write(str(s)+"\n")
 
 
 curses.wrapper(curses_main)
