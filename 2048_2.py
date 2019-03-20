@@ -15,6 +15,12 @@ actions1 = ['Up', 'Left', 'Down', 'Right']
 step=0
 # 当前的对战id号
 battle_id=0
+# 当次操作的方向
+direction=''
+# 移动前的field状态存储
+digital_set_before=''
+# 移动后的field状态存储
+digital_set_after=''
 
 # 链接sqlite3数据库
 dbname = 'operation.sqlite3'
@@ -41,68 +47,96 @@ def write_file(height='', width='', win='',field = ''):
 
 
 # 操作数据和每个方格的数字信息写入文件数据库sqlite3  name为 operation.sqlite3
-
-def write_file_to_operation(battle_id,step=0,action='',field_before='',field_after=''):
-    #  4*4的数组里面的数字变换成文字列然后写入文件
-    row_str = ''
-    row_str_all = ''
-    for row in field:
-        for i in range(len(row)):
-            maped_num = map(str, row)  # 格納される数値を文字列にする
-            row_str = ','.join(maped_num)
-        row_str_all += " "+row_str
-
+def write_file_to_operation_insert(battle_id, step=0, new_element=2, coordinate='0,0'):
     sql = 'insert into operation (' \
           'battle_id,' \
           'step,' \
           'new_digital,' \
-          'coordinate,' \
-          'Direction,' \
-          'digital_set_before,' \
-          'digital_set_after' \
-          ') values (?,?,?,?,?,?,?)'
-    record = (battle_id,1,2,'','',row_str_all,'')
+          'coordinate' \
+          ') values (?,?,?,?)'
+    record = (battle_id, step, new_element, coordinate)
     c.execute(sql, record)
     conn.commit()
 
-def write_file_to_record(battle_id=0,ver='', batle_time=time.localtime(), score=0,win_score=2048, width='4',height='4',result=''):
-    row_str = ''
-    row_str_all = ''
-    for row in field:
-        for i in range(len(row)):
-            maped_num = map(str, row)  # 格納される数値を文字列にする
-            row_str = ','.join(maped_num)
-        row_str_all += " "+row_str
 
-    sql = 'insert into operation (' \
+# 更新数据到operation表
+def write_file_to_operation_update(battle_id, step = 0, direction='', digital_set_before='', digital_set_after=''):
+    sql='update operation ' \
+        'set ' \
+        'Direction=?,' \
+        'digital_set_before=?,' \
+        'digital_set_after=? ' \
+        'where ' \
+        'battle_id=? ' \
+        'and ' \
+        'step=?'
+    record = (direction, digital_set_before, digital_set_after, battle_id, step)
+    c.execute(sql, record)
+    conn.commit()
+
+
+def write_file_to_record(battle_id=0, ver='', score=0, win_score=2048, width='4', height='4', result=''):
+
+    sql = 'insert into record (' \
           'battle_id,' \
-          'sept,' \
-          'new_digital,' \
-          'coordinate,' \
-          'Direction,' \
-          'digital_set_before,' \
-          'digital_set_after' \
+          'ver,' \
+          'score,' \
+          'win_score,' \
+          'width,' \
+          'height,' \
+          'result' \
           ') values (?,?,?,?,?,?,?)'
-    record = (1,1,2,'','',row_str_all,'')
+    record = (battle_id, ver, score, win_score, width, height, result)
+    c.execute(sql, record)
+    conn.commit()
+
+
+# 更新record表中的信息
+def write_file_to_record_update(battle_id,score,result):
+    sql='update record ' \
+        'set ' \
+        'score=?,' \
+        'result=?' \
+        'where ' \
+        'battle_id=? '
+    record = (score, result, battle_id)
     c.execute(sql, record)
     conn.commit()
 
 # 获取得分最多的时候的分数
 def get_highscore():
-    sql='select max(score) from record;'
-    highscore=c.execute(sql)
-    if highscore is None or highscore=='':
-        highscore=0
+    sql = 'select max(score) from record;'
+    highscore = c.execute(sql).fetchall()[0][0]
+    if highscore is None or highscore == '':
+        highscore = 0
     return highscore
 
-def get_battle_id():
-    sql = 'select max(battle_id) from record;'
-    battle_id = c.execute(sql)
-    if battle_id is None or battle_id == '':
+def get_new_battle_id():
+    sql = 'select max(battle_id) as max from record;'
+    battle_id = c.execute(sql).fetchall()[0][0]
+    if battle_id is None:
         battle_id = 1
     else:
-        battle_id += 1
+        battle_id = battle_id + 1
     return battle_id
+
+def get_current_battle_id():
+    sql = 'select max(battle_id) as max from record;'
+    battle_id = c.execute(sql).fetchall()[0][0]
+    if battle_id is None:
+        battle_id = 0
+    return battle_id
+
+def get_field_to_str(field):
+    row_str = ''
+    row_str_all = ''
+    for row in field:
+        for i in range(len(row)):
+            maped_num = map(str, row)  # 格納される数値を文字列にする
+            row_str = ','.join(maped_num)
+        row_str_all += " "+row_str
+    return row_str_all
+
 
 # 键盘值的获取，如果不在actions_dict里面就继续监听按键，如果在actions_dict里面就返回对应的操作。
 def get_user_action(keyboard):
@@ -140,9 +174,9 @@ class GameField(object):
         step=0
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         # 获取的初期field的数值写入文件和数据库
-        battle_id = get_battle_id()
-        write_file(height=str(self.height), width=str(self.width), win='2048',field=self.field)
-        write_file_to_record(battle_id,ver='1.0',win_score=2048,width=str(self.width),height=str(self.height))
+        battle_id = get_new_battle_id()
+        write_file(height=str(self.height), width=str(self.width), win='2048', field=self.field)
+        write_file_to_record(battle_id, ver='1.0', win_score=2048, width=str(self.width), height=str(self.height))
 
         self.spawn()
         self.spawn()
@@ -186,17 +220,31 @@ class GameField(object):
             if self.move_is_possible(direction):
                 self.field = moves[direction](self.field)
                 self.spawn()
+
+                # 获取执行移动后的field列表
+                digital_set_after = get_field_to_str(self.field)
+
                 return True
             else:
                 return False
 
     def is_win(self):
-        return any(any(i >= self.win_value for i in row) for row in self.field)
+        if any(any(i >= self.win_value for i in row) for row in self.field):
+            # 更新record表中的信息
+            write_file_to_record_update(get_current_battle_id(), self.score, 'Win')
+            return True
+        else:
+            return False
 
     def is_gameover(self):
-        return not any(self.move_is_possible(move) for move in actions1)
+        if not any(self.move_is_possible(move) for move in actions1):
+            # 更新record表中的信息
+            write_file_to_record_update(get_current_battle_id(), self.score, 'Game over')
+            return True
+        else:
+            return False
 
-    def out(self,screen,info):
+    def out(self, screen, info):
         screen.addstr(info + '\n')
 
     def draw(self, screen):
@@ -219,13 +267,15 @@ class GameField(object):
             cast(''.join('|{: ^5} '.format(num) if num > 0 else '|      ' for num in row) + '|')
 
         screen.clear()
-        cast('SCORE: ' + str(self.score))
+        cast('SCORE: ' + str(self.score)+'      STEP: ' + str(step))
+        self.highscore = get_highscore()
         if 0 != self.highscore:
             cast('HIGHSCORE: ' + str(self.highscore))
 
-        write_file(field=self.field)
-        write_file_to_sqlite3(field=self.field)
+        # 获取执行移动前的field列表
+        digital_set_before = get_field_to_str(self.field)
 
+        # 画图形，帮助说明文字
         for row in self.field:
             draw_hor_separator()
             draw_row(row)
@@ -246,10 +296,14 @@ class GameField(object):
         # choice()方法返回一个列表，元组或字符串的随机一项。 这里面是返回一个没有数字的空的i，j的坐标
         (i,j) = choice([(i,j) for i in range(self.width) for j in range(self.height) if self.field[i][j] == 0])
         self.field[i][j] = new_element
+        coordinate = str(i)+","+str(j)
+        battle_id=get_current_battle_id()
+        # 插入一个新的操作
+        write_file_to_operation_insert(battle_id, step, new_element, coordinate)
 
     def move_is_possible(self, direction):
         def row_is_left_movable(row):
-            def change(i): # true if there'll be change in i-th tile
+            def change(i):  # true if there'll be change in i-th tile
                 if row[i] == 0 and row[i + 1] != 0: # Move
                     return True
                 if row[i] != 0 and row[i + 1] == row[i]: # Merge
@@ -292,22 +346,25 @@ def main(stdscr):
         return responses[action]
 
     def game():
-        #画出当前棋盘状态
+        # 画出当前棋盘状态
         game_field.draw(stdscr)
-        # out(stdscr)
-        #读取用户输入得到action
+        # 读取用户输入得到action
         action = get_machine_direction()
-        # out(stdscr)
+        direction = action
         if action == 'Restart':
             return 'Init'
         if action == 'Exit':
             return 'Exit'
-        if game_field.move(action): # move successful
-            game_field.out(stdscr,action)
+        if game_field.move(action):  # move successful
+            # 操作方向显示到screen上面去
+            game_field.out(stdscr, direction)
+
             # 操作方向和更新前后的field写入数据库
+            battle_id=get_current_battle_id()
             global step
+            write_file_to_operation_update(battle_id, step, direction, digital_set_before, digital_set_after)
+            # global step
             step += 1
-            write_file_to_operation(battle_id,step,action, field_before=self.field,field_after=self.field)
             if game_field.is_win():
                 return 'Win'
             if game_field.is_gameover():
