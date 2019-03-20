@@ -12,15 +12,15 @@ actions = ['Restart', 'Exit']
 actions_dict = dict(zip(letter_codes, actions * 2))
 actions1 = ['Up', 'Left', 'Down', 'Right']
 # 步数 当前是策略的第几步
-step=0
+step = 1
 # 当前的对战id号
-battle_id=0
+battle_id = 0
 # 当次操作的方向
-direction=''
+direction = ''
 # 移动前的field状态存储
-digital_set_before=''
+digital_set_before = ''
 # 移动后的field状态存储
-digital_set_after=''
+digital_set_after = ''
 
 # 链接sqlite3数据库
 dbname = 'operation.sqlite3'
@@ -32,7 +32,7 @@ c = conn.cursor()
 f = open('operation_log.txt', 'a+')
 
 
-def write_file(height='', width='', win='',field = ''):
+def write_file(height='', width='', win='', field=''):
     header = "height={}   width={}    win={}".format(height, width, win)
     f.write(header + "\n")
     #  4*4的数组里面的数字变换成文字列然后写入文件
@@ -60,7 +60,7 @@ def write_file_to_operation_insert(battle_id, step=0, new_element=2, coordinate=
 
 
 # 更新数据到operation表
-def write_file_to_operation_update(battle_id, step = 0, direction='', digital_set_before='', digital_set_after=''):
+def write_file_to_operation_update(battle_id, step=0, direction='', digital_set_before='', digital_set_after=''):
     sql='update operation ' \
         'set ' \
         'Direction=?,' \
@@ -171,7 +171,7 @@ class GameField(object):
         self.highscore = get_highscore()
         self.score = 0
         global step
-        step=0
+        step = 1
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         # 获取的初期field的数值写入文件和数据库
         battle_id = get_new_battle_id()
@@ -222,6 +222,7 @@ class GameField(object):
                 self.spawn()
 
                 # 获取执行移动后的field列表
+                global digital_set_after
                 digital_set_after = get_field_to_str(self.field)
 
                 return True
@@ -273,6 +274,7 @@ class GameField(object):
             cast('HIGHSCORE: ' + str(self.highscore))
 
         # 获取执行移动前的field列表
+        global digital_set_before
         digital_set_before = get_field_to_str(self.field)
 
         # 画图形，帮助说明文字
@@ -294,7 +296,7 @@ class GameField(object):
         new_element = 4 if randrange(100) > 89 else 2
         # 检测所有的方格中的数字 如果是0 就提交出去
         # choice()方法返回一个列表，元组或字符串的随机一项。 这里面是返回一个没有数字的空的i，j的坐标
-        (i,j) = choice([(i,j) for i in range(self.width) for j in range(self.height) if self.field[i][j] == 0])
+        (i, j) = choice([(i, j) for i in range(self.width) for j in range(self.height) if self.field[i][j] == 0])
         self.field[i][j] = new_element
         coordinate = str(i)+","+str(j)
         battle_id=get_current_battle_id()
@@ -362,13 +364,16 @@ def main(stdscr):
             # 操作方向和更新前后的field写入数据库
             battle_id=get_current_battle_id()
             global step
+            global digital_set_before
+            global digital_set_after
             write_file_to_operation_update(battle_id, step, direction, digital_set_before, digital_set_after)
-            # global step
-            step += 1
             if game_field.is_win():
                 return 'Win'
             if game_field.is_gameover():
                 return 'Gameover'
+
+            step += 1
+
         return 'Game'     # 始终循环Game 方格的移动胜利或者失败或者退出都在Game里面
 
 
