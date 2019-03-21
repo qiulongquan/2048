@@ -6,6 +6,8 @@ import sqlite3
 from contextlib import closing
 from random import randrange, choice  # generate and place new tile
 from collections import defaultdict
+from AI_2048 import AI_search
+
 
 letter_codes = [ord(ch) for ch in 'RQrq']
 actions = ['Restart', 'Exit']
@@ -76,7 +78,6 @@ def write_file_to_operation_update(battle_id, step=0, direction='', digital_set_
 
 
 def write_file_to_record(battle_id=0, ver='', score=0, win_score=2048, width='4', height='4', result=''):
-
     sql = 'insert into record (' \
           'battle_id,' \
           'ver,' \
@@ -146,8 +147,9 @@ def get_user_action(keyboard):
     return actions_dict[char]
 
 
-def get_machine_direction():
+def get_machine_direction(field):
     direction=choice(actions1)
+    AI_search(grid=field)
     # print("方向操作:",direction)
     return direction
 
@@ -351,7 +353,7 @@ def main(stdscr):
         # 画出当前棋盘状态
         game_field.draw(stdscr)
         # 读取用户输入得到action
-        action = get_machine_direction()
+        action = get_machine_direction(game_field.field)
         direction = action
         if action == 'Restart':
             return 'Init'

@@ -1,10 +1,15 @@
 function AI(grid) {
   this.grid = grid;
+  // grid是当前的16个cell里面的数字列表
+  // document.write("grid="+grid);
 }
 
+// 格局评价---启发指标采用了加权策略
 // static evaluation function
 AI.prototype.eval = function() {
+  // emptyCells 这个是当前为0的cell的个数
   var emptyCells = this.grid.availableCells().length;
+  // document.write("emptyCells="+emptyCells);
 
   var smoothWeight = 0.1,
       //monoWeight   = 0.0,
@@ -13,12 +18,13 @@ AI.prototype.eval = function() {
       emptyWeight  = 2.7,
       maxWeight    = 1.0;
 
+  // 最后算出一个格局评价的值然后返回
   return this.grid.smoothness() * smoothWeight
        //+ this.grid.monotonicity() * monoWeight
        //- this.grid.islands() * islandWeight
        + this.grid.monotonicity2() * mono2Weight
        + Math.log(emptyCells) * emptyWeight
-       + this.grid.maxValue() * maxWeight;
+       + this.grid.maxValue() * maxWeight;   // maxValue代表当前方格中的最大数字
 };
 
 // alpha-beta depth first search
