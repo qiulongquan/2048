@@ -1,11 +1,12 @@
 import math
+from grid import grid
 
-class AI_search():
+class AI_2048():
     def __init__(self, grid):
-        # // grid是当前的16个cell里面的数字列表 [[2,2,2,2],[2,2,2,2],[2,2,2,2],[2,2,2,2]]
+        # // grid是当前的16个cell里面的数字列表 [[2,2,2,2],[2,2,2,2],[2,2,2,2],[2,2,2,2]]  and playerTurn
         self.grid = grid
-        self.out(self.grid)
-        self.playerTurn = True
+        self.original_grid = grid
+        self.out(self.grid.get_current_grid())
 
     def get_field_to_str(self, field):
         row_str = ''
@@ -21,8 +22,8 @@ class AI_search():
         f = open("out.txt", 'a+')
         f.write(self.get_field_to_str(info))
 
-    # availableCells 这个是当前为0的cell的个数
-    def availableCells(self, field):
+    # availableCells 这个是当前为0的cell的列表
+    def availableCells_length(self, field):
         count = 0
         for row in field:
             for i in range(len(row)):
@@ -33,7 +34,7 @@ class AI_search():
     # 格局评价---启发指标采用了加权策略  static evaluation function
     def eval(self, field):
         # emptyCells 这个是当前为0的cell的个数
-        emptyCells = self.availableCells(field)
+        emptyCells = self.availableCells_length(field)
 
         smoothWeight = 0.1
         # monoWeight   = 0.0,
@@ -57,24 +58,25 @@ class AI_search():
         result = {}
 
         # // the maxing player
-        if (self.playerTurn):
+        if (self.grid.playerTurn):
             bestScore = alpha
             for direction in [0, 1, 2, 3]:
-                newGrid = self.grid
-                if newGrid.move(direction).moved:
-                    positions+=1
-                    if newGrid.isWin():
-                        return {move: direction, score:10000, positions: positions, cutoffs: cutoffs}
-                    var newAI = new AI(newGrid)
+                newGrid = grid(self.original_grid)
+                if newGrid.move(direction):
+                    positions += 1
+                    if newGrid.is_win():
+                        return {'move': direction, 'score':10000, 'positions': positions, 'cutoffs': cutoffs}
+
+                    newAI = AI_2048(newGrid)
 
                     if depth == 0:
-                        result = { move: direction, score: newAI.eval() }
+                        result = { 'move': direction, 'score': newAI.eval() }
                     else:
                         result = newAI.search(depth-1, bestScore, beta, positions, cutoffs)
                         # // win
                         if result.score > 9900:
                             # // to slightly penalize higher depth from win
-                            result.score-=1
+                            result.score -= 1
                         positions = result.positions
                         cutoffs = result.cutoffs
 
@@ -83,8 +85,8 @@ class AI_search():
                         bestMove = direction
 
                     if bestScore > beta:
-                        cutoffs+=1
-                        return { move: bestMove, score: beta, positions: positions, cutoffs: cutoffs }
+                        cutoffs += 1
+                        return { 'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs }
 
         # // computer's turn, we'll do heavy pruning to keep the branching factor low
         else:
@@ -92,11 +94,11 @@ class AI_search():
         # try a 2 and 4 in each cell and measure how annoying it is
         # with metrics from eval
             candidates = []
-            cells = self.grid.availableCells()
+            cells = self.grid.get_current_grid()
             scores = {2: [], 4: []}
             for value in scores:
                 for i in cells:
-                    scores[value].push(null)
+                    # cell  [[2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2]]
                     cell = cells[i]
                     tile = new Tile(cell, parseInt(value, 10))
                     self.grid.insertTile(tile)

@@ -1,13 +1,12 @@
 # -*- coding:utf-8 -*-
 
 import curses
-import time
 import sqlite3
 from contextlib import closing
 from random import randrange, choice  # generate and place new tile
 from collections import defaultdict
-from AI_2048 import AI_search
-
+from AI_2048 import AI_2048
+from grid import grid
 
 letter_codes = [ord(ch) for ch in 'RQrq']
 actions = ['Restart', 'Exit']
@@ -149,7 +148,11 @@ def get_user_action(keyboard):
 
 def get_machine_direction(field):
     direction=choice(actions1)
-    AI_search(grid=field)
+
+    # 实例化一个grid生成newgrid，然后把newgrid作为参数实例化AI_search
+    newgrid = grid(current_grid=field)
+    ai_2048 = AI_2048(grid=newgrid)
+
     # print("方向操作:",direction)
     return direction
 

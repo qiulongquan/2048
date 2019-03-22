@@ -1,6 +1,6 @@
 function AI(grid) {
   this.grid = grid;
-  // grid是当前的16个cell里面的数字列表
+  // grid是当前的16个cell里面的数字列表  and playerTurn
   // document.write("grid="+grid);
 }
 
@@ -79,10 +79,15 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
     for (var value in scores) {
       for (var i in cells) {
         scores[value].push(null);
+        // 从cells里面拿出一个空值的坐标给cell 为了去创建tile实例
         var cell = cells[i];
+        // 建立tile 创建一个tile实例  里面包括数值和坐标
         var tile = new Tile(cell, parseInt(value, 10));
+        // 刚才建立的tile插入到insertTile里面去
         this.grid.insertTile(tile);
+        // 计算evaluation放入scores字典里面
         scores[value][i] = -this.grid.smoothness() + this.grid.islands();
+        // 最后删掉刚才插入的cell
         this.grid.removeTile(cell);
       }
     }
@@ -92,6 +97,7 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
     for (var value in scores) { // 2 and 4
       for (var i=0; i<scores[value].length; i++) {
         if (scores[value][i] == maxScore) {
+          // 创建候选者列表  符合maxscore最大值的坐标和数字进入到候选者列表中
           candidates.push( { position: cells[i], value: parseInt(value, 10) } );
         }
       }

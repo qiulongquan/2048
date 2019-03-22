@@ -48,7 +48,7 @@ Grid.prototype.availableCells = function () {
       cells.push( {x:x, y:y} );
     }
   });
-
+// 这个返回的是当前为空的cell，也就是可以使用的cell的坐标  是一个2为数组列表
   return cells;
 };
 
