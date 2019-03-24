@@ -68,10 +68,12 @@ Grid.prototype.cellsAvailable = function () {
 
 // Check if the specified cell is taken
 Grid.prototype.cellAvailable = function (cell) {
+// 取回来的是一个true或者false的值 通过！进行逆转换 true变成false， false变成true
   return !this.cellOccupied(cell);
 };
 
 Grid.prototype.cellOccupied = function (cell) {
+  // 取回来的cell是一个数值0或者非0 ，利用！！将0转换为false，将非0转换为true
   return !!this.cellContent(cell);
 };
 
@@ -375,9 +377,12 @@ Grid.prototype.smoothness = function() {
   var smoothness = 0;
   for (var x=0; x<4; x++) {
     for (var y=0; y<4; y++) {
+      // 先通过this.cellOccupied( this.indexes[x][y]找到cell里面非0的值，然后在进行后面的运算
       if ( this.cellOccupied( this.indexes[x][y] )) {
+        // 当前cell里面的值提取然后log运算
         var value = Math.log(this.cellContent( this.indexes[x][y] ).value) / Math.log(2);
         for (var direction=1; direction<=2; direction++) {
+          // 获取direction对应的vector值
           var vector = this.getVector(direction);
           var targetCell = this.findFarthestPosition(this.indexes[x][y], vector).next;
 

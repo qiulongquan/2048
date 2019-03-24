@@ -1,5 +1,7 @@
 import math
+import time
 from grid import grid
+minSearchTime = 100
 
 class AI_2048():
     def __init__(self, grid):
@@ -23,18 +25,18 @@ class AI_2048():
         f.write(self.get_field_to_str(info))
 
     # availableCells 这个是当前为0的cell的列表
-    def availableCells_length(self, field):
+    def availableCells_length(self):
         count = 0
-        for row in field:
+        for row in self.grid.get_current_grid():
             for i in range(len(row)):
                 if row[i] == 0:
                     count += 1
         return count
 
     # 格局评价---启发指标采用了加权策略  static evaluation function
-    def eval(self, field):
+    def eval(self):
         # emptyCells 这个是当前为0的cell的个数
-        emptyCells = self.availableCells_length(field)
+        emptyCells = self.availableCells_length()
 
         smoothWeight = 0.1
         # monoWeight   = 0.0,
@@ -70,18 +72,18 @@ class AI_2048():
                     newAI = AI_2048(newGrid)
 
                     if depth == 0:
-                        result = { 'move': direction, 'score': newAI.eval() }
+                        result = { 'move': direction, 'score': newAI.eval()}
                     else:
                         result = newAI.search(depth-1, bestScore, beta, positions, cutoffs)
                         # // win
-                        if result.score > 9900:
+                        if result['score'] > 9900:
                             # // to slightly penalize higher depth from win
-                            result.score -= 1
-                        positions = result.positions
-                        cutoffs = result.cutoffs
+                            result['score'] -= 1
+                        positions = result['positions']
+                        cutoffs = result['cutoffs']
 
-                    if result.score > bestScore:
-                        bestScore = result.score
+                    if result['score'] > bestScore:
+                        bestScore = result['score']
                         bestMove = direction
 
                     if bestScore > beta:
@@ -97,46 +99,47 @@ class AI_2048():
             cells = self.grid.get_current_grid()
             scores = {2: [], 4: []}
             for value in scores:
-                for i in cells:
+                for i in range(len(cells)):
+                    for n in range(len(cells[i])):
                     # cell  [[2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2], [2, 2, 2, 2]]
-                    cell = cells[i]
-                    tile = new Tile(cell, parseInt(value, 10))
-                    self.grid.insertTile(tile)
-                    scores[value][i] = - self.grid.smoothness() + self.grid.islands()
-                    self.grid.removeTile(cell)
+                    # scores的格式sample
+                    # scores = {2: [[2, [0, 2]], [5, [1, 3]], [7, [0, 4]]],
+                    #           4: [[21, [10, 21]], [51, [2, 31]], [71, [0, 41]]]}
+                        if cells[i][n]==0:
+                            cells[i][n]=value
+                            scores[value][i][0] = - self.grid.smoothness() + self.grid.islands()
+                            scores[value][i][1] =[i,n]
+                            cells[i][n]=0
 
         # // now just pick out the most annoying moves
-            maxScore = Math.max(Math.max.apply(null, scores[2]), Math.max.apply(null, scores[4]));
+            maxScore = (max(max(scores[2]),max(scores[4])))
             # // 2 and 4
             for value in scores:
-                i = 0
-                for i < scores[value].length:
-                    if scores[value][i] == maxScore:
-                        candidates.push( {position: cells[i], value: parseInt(value, 10)} )
-                    i+=1
+                for i in range(len(scores[value])):
+                    if scores[value][i][0] == maxScore:
+                        candidates.append({'position': scores[value][i][1], 'value': value})
 
         # // search on each candidate
-            for (var i=0; i < candidates.length; i++):
-                position = candidates[i].position
-                value = candidates[i].value
-                newGrid = self.grid.clone()
-                tile = new Tile(position, value)
-                newGrid.insertTile(tile)
-                newGrid.playerTurn = true
-                positions+=1
-                newAI = new AI(newGrid)
+            for i in range(len(candidates)):
+                position = candidates[i]['position']
+                value = candidates[i]['value']
+                newGrid = self.original_grid
+                newGrid[position[0]][position[1]] = value
+                newGrid.playerTurn = True
+                positions += 1
+                newAI = AI_2048(newGrid)
                 result = newAI.search(depth, alpha, bestScore, positions, cutoffs)
-                positions = result.positions
-                cutoffs = result.cutoffs
+                positions = result['positions']
+                cutoffs = result['cutoffs']
 
-                if result.score < bestScore:
-                    bestScore = result.score
+                if result['score'] < bestScore:
+                    bestScore = result['score']
 
                 if bestScore < alpha:
                     cutoffs+=1
-                    return {move: null, score: alpha, positions: positions, cutoffs: cutoffs}
+                    return {'move': '', 'score': alpha, 'positions': positions, 'cutoffs': cutoffs}
 
-        return {move: bestMove, score: bestScore, positions: positions, cutoffs: cutoffs}
+        return {'move': bestMove, 'score': bestScore, 'positions': positions, 'cutoffs': cutoffs}
 
     #  // performs a search and returns the best move
 
@@ -146,23 +149,17 @@ class AI_2048():
 # // performs iterative deepening over the alpha-beta search
 
     def iterativeDeep(self):
-        start = (new Date()).getTime()
+        start = time.time()
         depth = 0
-        best={}
-        do {
-            newBest = self.search(depth, -10000, 10000, 0 ,0)
-            if newBest.move == -1:
+        best = {}
+        while True:
+            newBest = self.search(depth, -10000, 10000, 0, 0)
+            if newBest['move'] == -1:
                 break
             else:
                 best = newBest
-            depth+=1
-        } while ( (new Date()).getTime() - start < minSearchTime)
-        return best
+            depth += 1
+            if minSearchTime < (time.time() - start)*1000:
+                break
 
-    def translate(self,move):
-        return {
-        0: 'up',
-        1: 'right',
-        2: 'down',
-        3: 'left'
-        }[move]
+        return best

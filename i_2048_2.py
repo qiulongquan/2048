@@ -2,6 +2,7 @@
 
 import curses
 import sqlite3
+import time
 from contextlib import closing
 from random import randrange, choice  # generate and place new tile
 from collections import defaultdict
@@ -147,12 +148,15 @@ def get_user_action(keyboard):
 
 
 def get_machine_direction(field):
-    direction=choice(actions1)
-
+    # direction=choice(actions1)
+    rule = ['Up', 'Right', 'Down', 'Left']
     # 实例化一个grid生成newgrid，然后把newgrid作为参数实例化AI_search
     newgrid = grid(current_grid=field)
     ai_2048 = AI_2048(grid=newgrid)
-
+    ai_2048_exec_after = ai_2048.getBest()
+    # 返回来的move是一个0-3的数字，根据规则rule然后转化成方向文字
+    # //direction   0: up, 1: right, 2: down, 3: left
+    direction = rule[ai_2048_exec_after['move']]
     # print("方向操作:",direction)
     return direction
 
@@ -353,6 +357,7 @@ def main(stdscr):
         return responses[action]
 
     def game():
+        time.sleep(0.1)
         # 画出当前棋盘状态
         game_field.draw(stdscr)
         # 读取用户输入得到action

@@ -1,3 +1,5 @@
+import math
+
 def transpose(field):
     return [list(row) for row in zip(*field)]
 
@@ -96,3 +98,78 @@ class grid():
             return True
         else:
             return False
+
+    def cellContent(self,list1):
+        if self.withinBounds(list1):
+            return self.current_grid[list1[0]][list1[1]]
+
+    def cellAvailable(self,list1):
+        use_value = ''
+        if self.current_grid[list1[0]][list1[1]] == 0:
+            use_value = False
+            use_value = True
+        else:
+            use_value = True
+            use_value = False
+        return use_value
+
+    # // measures how smooth the grid is (as if the values of the pieces
+    # // were interpreted as elevations). Sums of the pairwise difference
+    # // between neighboring tiles (in log space, so it represents the
+    # // number of merges that need to happen before they can merge).
+    # // Note that the pieces can be distant
+    def smoothness(self):
+        smoothness = 0
+        for x in range(len(self.current_grid)):
+            for y in range(len(self.current_grid[x])):
+                list1=[x,y]
+                use_value = self.cellAvailable(list1)
+                if use_value:
+                    value = math.log(self.cellContent(list1))/math.log(2)
+                    direction = 1
+                    while direction <= 2:
+                        vector = self.getVector(direction)
+                        targetCell = self.findFarthestPosition(list1, vector)['next']
+                        list1 = [targetCell['x'], targetCell['y']]
+                        if self.cellOccupied(list1):
+                            target = self.cellContent(list1)
+                            targetValue = math.log(target) / math.log(2)
+                            smoothness -= abs(value - targetValue)
+                        direction += 1
+        return smoothness
+
+    def getVector(self,direction):
+        # 0: {x: 0, y: -1}, // up
+        # 3: {x: -1, y: 0} // left
+        # 2: {x: 0, y: 1}, // down
+        # 1: {x: 1, y: 0}, // right
+        vector={0:{'x': 0, 'y': -1},3:{'x': -1, 'y': 0},2: {'x': 0, 'y': 1},1: {'x': 1, 'y': 0}}
+        return vector[direction]
+
+    def cellOccupied(self,list1):
+        if self.current_grid[list1[0]][list1[1]]==0:
+            return False
+        else:
+            return True
+
+    def withinBounds(self,list1):
+        size = len(self.current_grid)
+        if list1[0]>=0 and list1[0]<size and list1[1]>=0 and list1[1]<size:
+            return True
+        else:
+            return False
+
+    def findFarthestPosition(self,cell,vector):
+        previous=[]
+        # cell sample   cell=[x,y]
+        # // Progress towards the vector direction until an obstacle is found
+        while True:
+            previous = cell
+            cell = {'x': previous[0] + vector['x'], 'y': previous[1] + vector['y']}
+            list1=[cell['x'],cell['y']]
+            if not (self.withinBounds(list1) and self.cellAvailable(list1)):
+                break
+
+        # // Used to check if a merge is required
+        return {'farthest':previous,'next':cell}
+
