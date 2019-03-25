@@ -138,6 +138,38 @@ class grid():
                         direction += 1
         return smoothness
 
+    # measures how monotonic the grid is. This means the values of the tiles are strictly increasing
+    # // or decreasing in both the left/right and up/down directions
+    def monotonicity2(self):
+        # // scores for all four directions
+        totals = [0, 0, 0, 0]
+        size=len(self.current_grid)
+        for x in size:
+            current = 0
+            next = current+1
+            while next < 4:
+                while next < 4:
+                    next += 1
+                if next >= 4:
+                    next -= 1
+
+                if self.cellOccupied([x, current]):
+                    currentValue = math.log(self.cellContent([x, current])) / math.log(2)
+                else:
+                    currentValue = 0
+
+                if self.cellOccupied([x, next]):
+                    nextValue = math.log(self.cellContent([x, next])) / math.log(2)
+                else:
+                    nextValue = 0
+                # //direction   0: up, 1: right, 2: down, 3: left
+                if currentValue > nextValue:
+                    totals[0] += nextValue - currentValue
+                elif nextValue > currentValue:
+                    totals[2] += currentValue - nextValue
+                current = next
+                next += 1
+
     # // counts the number of isolated groups.
     def islands(self):
         size = len(self.current_grid)
