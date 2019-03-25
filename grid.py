@@ -99,11 +99,11 @@ class grid():
         else:
             return False
 
-    def cellContent(self,list1):
+    def cellContent(self, list1):
         if self.withinBounds(list1):
             return self.current_grid[list1[0]][list1[1]]
 
-    def cellAvailable(self,list1):
+    def cellAvailable(self, list1):
         use_value = ''
         if self.current_grid[list1[0]][list1[1]] == 0:
             use_value = False
@@ -138,16 +138,62 @@ class grid():
                         direction += 1
         return smoothness
 
-    def getVector(self,direction):
+    # // counts the number of isolated groups.
+    def islands(self):
+        size = len(self.current_grid)
+        # 先定义一个row ，colum的空2维数组 每个cell里面的值为0
+        # 程序中动态定义生成一个2维数组
+        list_new = [[0 for col in range(size)] for row in range(size)]
+
+        def list_convert():
+            for x in range(size):
+                for y in range(size):
+                    list_new[x][y] = {'value': 0, 'marked': ''}
+
+            for x in range(len(self.current_grid)):
+                for y in range(len(self.current_grid[x])):
+                    list_new[x][y]['value'] = self.current_grid[x][y]
+
+        def mark(x, y, value):
+            if x >= 0 \
+                    and x <= len(list_new) \
+                    and y >= 0 \
+                    and y <= len(list_new) \
+                    and list_new[x][y] != 0 \
+                    and list_new[x][y]['value'] == value \
+                    and not list_new[x][y]['marked']:
+
+                list_new[x][y]['marked'] = True
+                for direction in [0, 1, 2, 3]:
+                    vector = self.getVector(direction)
+                    mark(x + vector['x'], y + vector['y'], value)
+
+        # 数组转换操　　self.current_grid　→　list_new
+        list_convert()
+        islands = 0
+        for x in range(len(list_new)):
+            for y in range(len(list_new[x])):
+                if list_new[x][y]['value'] != 0:
+                    list_new[x][y]['marked'] = False
+
+        for x in range(len(list_new)):
+            for y in range(len(list_new[x])):
+                if list_new[x][y]['value'] != 0 and not list_new[x][y]['marked']:
+                    islands += 1
+                    mark(x, y, list_new[x][y]['value'])
+
+        return islands
+
+    def getVector(self, direction):
         # 0: {x: 0, y: -1}, // up
         # 3: {x: -1, y: 0} // left
         # 2: {x: 0, y: 1}, // down
         # 1: {x: 1, y: 0}, // right
-        vector={0:{'x': 0, 'y': -1},3:{'x': -1, 'y': 0},2: {'x': 0, 'y': 1},1: {'x': 1, 'y': 0}}
+        vector = {0: {'x': 0, 'y': -1}, 3: {'x': -1, 'y': 0}, 2: {'x': 0, 'y': 1}, 1: {'x': 1, 'y': 0}}
         return vector[direction]
 
     def cellOccupied(self,list1):
-        if self.current_grid[list1[0]][list1[1]]==0:
+        if self.current_grid[list1[0]][list1[1]] == 0:
             return False
         else:
             return True
@@ -159,17 +205,17 @@ class grid():
         else:
             return False
 
-    def findFarthestPosition(self,cell,vector):
-        previous=[]
+    def findFarthestPosition(self, cell, vector):
+        previous = []
         # cell sample   cell=[x,y]
         # // Progress towards the vector direction until an obstacle is found
         while True:
             previous = cell
             cell = {'x': previous[0] + vector['x'], 'y': previous[1] + vector['y']}
-            list1=[cell['x'],cell['y']]
+            list1 = [cell['x'], cell['y']]
             if not (self.withinBounds(list1) and self.cellAvailable(list1)):
                 break
 
         # // Used to check if a merge is required
-        return {'farthest':previous,'next':cell}
+        return {'farthest': previous, 'next': cell}
 
