@@ -1,3 +1,21 @@
+# 有break的时候,直接退出while，只显示一次0
+# while True:
+#     if 1:
+#         print("0")
+#         break
+#         print("1")
+#     print("2")
+
+# 输出10次0 然后退出for 显示一次2，然后在下一次while循环 不会显示1
+# while True:
+#     for i in range(10):
+#         print("0")
+#         continue
+#         print("1")
+#     print("2")
+
+
+
 # # 多线程锁的使用
 # # coding : uft-8
 # __author__ = 'Phtih0n'
