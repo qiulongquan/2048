@@ -67,7 +67,7 @@ class AI_2048():
                 if newGrid.move(direction):
                     positions += 1
                     if newGrid.is_win():
-                        return {'move': direction, 'score':10000, 'positions': positions, 'cutoffs': cutoffs}
+                        return {'move': direction, 'score': 10000, 'positions': positions, 'cutoffs': cutoffs}
 
                     newAI = AI_2048(newGrid)
 
@@ -150,6 +150,7 @@ class AI_2048():
 
     def iterativeDeep(self):
         start = time.time()
+        print("start", start)
         depth = 0
         best = {}
         while True:
@@ -161,5 +162,5 @@ class AI_2048():
             depth += 1
             if minSearchTime < (time.time() - start)*1000:
                 break
-
+        print("best={}".format(best))
         return best

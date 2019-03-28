@@ -150,13 +150,17 @@ def get_user_action(keyboard):
 def get_machine_direction(field):
     # direction=choice(actions1)
     rule = ['Up', 'Right', 'Down', 'Left']
+    print(rule)
     # 实例化一个grid生成newgrid，然后把newgrid作为参数实例化AI_search
     newgrid = grid(current_grid=field)
     ai_2048 = AI_2048(grid=newgrid)
     ai_2048_exec_after = ai_2048.getBest()
     # 返回来的move是一个0-3的数字，根据规则rule然后转化成方向文字
     # //direction   0: up, 1: right, 2: down, 3: left
-    direction = rule[ai_2048_exec_after['move']]
+    # direction是英文文字 Up，Right，Down，Left
+    # ai_2048_exec_after['move']返回来的是一个数字然后根据rule里面的对照关系返回因为字母Up，Right，Down，Left给direction
+    n = ai_2048_exec_after['move']
+    direction = rule[n]
     # print("方向操作:",direction)
     return direction
 
@@ -216,13 +220,13 @@ class GameField(object):
             return tighten(merge(tighten(row)))
 
         moves = {}
-        moves['Left']  = lambda field:                              \
+        moves['Left'] = lambda field:                              \
                 [move_row_left(row) for row in field]
         moves['Right'] = lambda field:                              \
                 invert(moves['Left'](invert(field)))
-        moves['Up']    = lambda field:                              \
+        moves['Up'] = lambda field:                              \
                 transpose(moves['Left'](transpose(field)))
-        moves['Down']  = lambda field:                              \
+        moves['Down'] = lambda field:                              \
                 transpose(moves['Right'](transpose(field)))
 
         if direction in moves:

@@ -1,5 +1,7 @@
 import math
 
+# file1d这个地方的值是grid的实例
+# type object argument after * must be an iterable, not grid
 def transpose(field):
     return [list(row) for row in zip(*field)]
 
@@ -8,7 +10,7 @@ def invert(field):
     return [row[::-1] for row in field]
 
 
-def move_is_possible(direction, field):
+def move_is_possible(direction, field1):
     def row_is_left_movable(row):
         def change(i):  # true if there'll be change in i-th tile
             if row[i] == 0 and row[i + 1] != 0: # Move
@@ -18,22 +20,23 @@ def move_is_possible(direction, field):
             return False
         return any(change(i) for i in range(len(row) - 1))
 
+    # //direction   0: up, 1: right, 2: down, 3: left
     check = {}
-    check[3] = lambda field:                              \
+    check['Left'] = lambda field:                              \
             any(row_is_left_movable(row) for row in field)
 
-    check[1] = lambda field:                              \
+    check['Right'] = lambda field:                              \
                 check['Left'](invert(field))
 
-    check[0] = lambda field:                              \
+    check['Up'] = lambda field:                              \
             check['Left'](transpose(field))
 
-    check[2] = lambda field:                              \
+    check['Down'] = lambda field:                              \
             check['Right'](transpose(field))
 
     if direction in check:
         # //direction   0: up, 1: right, 2: down, 3: left
-        return check[direction](field)
+        return check[direction](field1)
     else:
         return False
 
@@ -73,13 +76,13 @@ class grid():
             return tighten(merge(tighten(row)))
 
         moves = {}
-        moves[3] = lambda field:                              \
+        moves['Left'] = lambda field:                              \
                 [move_row_left(row) for row in field]
-        moves[1] = lambda field:                              \
+        moves['Right'] = lambda field:                              \
                 invert(moves['Left'](invert(field)))
-        moves[0] = lambda field:                              \
+        moves['Up'] = lambda field:                              \
                 transpose(moves['Left'](transpose(field)))
-        moves[2] = lambda field:                              \
+        moves['Down'] = lambda field:                              \
                 transpose(moves['Right'](transpose(field)))
 
         if direction in moves:
@@ -143,12 +146,12 @@ class grid():
     def monotonicity2(self):
         # // scores for all four directions
         totals = [0, 0, 0, 0]
-        size=len(self.current_grid)
+        size = len(self.current_grid)
         for x in size:
             current = 0
-            next = current+1
+            next = current + 1
             while next < 4:
-                while next < 4:
+                while next < 4 and self.cellAvailable([x, next]):
                     next += 1
                 if next >= 4:
                     next -= 1
@@ -169,6 +172,43 @@ class grid():
                     totals[2] += currentValue - nextValue
                 current = next
                 next += 1
+
+    # // left / right  direction
+        for y in size:
+            current = 0
+            next = current + 1
+            while next < 4:
+                while next < 4 and self.cellAvailable([next, y]):
+                    next += 1
+                if next >= 4:
+                    next -= 1
+
+                if self.cellOccupied([current, y]):
+                    currentValue = math.log(self.cellContent([current, y])) / math.log(2)
+                else:
+                    currentValue = 0
+
+                if self.cellOccupied([next, y]):
+                    nextValue = math.log(self.cellContent([next, y])) / math.log(2)
+                else:
+                    nextValue = 0
+                # //direction   0: up, 1: right, 2: down, 3: left
+                if currentValue > nextValue:
+                    totals[3] += nextValue - currentValue
+                elif nextValue > currentValue:
+                    totals[1] += currentValue - nextValue
+                current = next
+                next += 1
+
+        return math.max(totals[0], totals[2]) + math.max(totals[3], totals[1])
+
+    def maxValue(self):
+        max = 0
+        for x in range(len(self.current_grid)):
+            for y in range(len(self.current_grid[x])):
+                if self.current_grid[x][y] > max:
+                    max = self.current_grid[x][y]
+        return max
 
     # // counts the number of isolated groups.
     def islands(self):
@@ -224,13 +264,13 @@ class grid():
         vector = {0: {'x': 0, 'y': -1}, 3: {'x': -1, 'y': 0}, 2: {'x': 0, 'y': 1}, 1: {'x': 1, 'y': 0}}
         return vector[direction]
 
-    def cellOccupied(self,list1):
+    def cellOccupied(self, list1):
         if self.current_grid[list1[0]][list1[1]] == 0:
             return False
         else:
             return True
 
-    def withinBounds(self,list1):
+    def withinBounds(self, list1):
         size = len(self.current_grid)
         if list1[0]>=0 and list1[0]<size and list1[1]>=0 and list1[1]<size:
             return True
