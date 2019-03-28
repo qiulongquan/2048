@@ -29,10 +29,8 @@ dbname = 'operation.sqlite3'
 conn = sqlite3.connect(dbname)
 c = conn.cursor()
 
-
 # 操作数据和每个方格的数字信息写入文件
 f = open('operation_log.txt', 'a+')
-
 
 def write_file(height='', width='', win='', field=''):
     header = "height={}   width={}    win={}".format(height, width, win)
@@ -47,7 +45,6 @@ def write_file(height='', width='', win='', field=''):
         f.write(row_str + "\n")
     f.write("\n"+"="*60+"\n")
 
-
 # 操作数据和每个方格的数字信息写入文件数据库sqlite3  name为 operation.sqlite3
 def write_file_to_operation_insert(battle_id, step=0, new_element=2, coordinate='0,0'):
     sql = 'insert into operation (' \
@@ -59,7 +56,6 @@ def write_file_to_operation_insert(battle_id, step=0, new_element=2, coordinate=
     record = (battle_id, step, new_element, coordinate)
     c.execute(sql, record)
     conn.commit()
-
 
 # 更新数据到operation表
 def write_file_to_operation_update(battle_id, step=0, direction='', digital_set_before='', digital_set_after=''):
@@ -76,7 +72,6 @@ def write_file_to_operation_update(battle_id, step=0, direction='', digital_set_
     c.execute(sql, record)
     conn.commit()
 
-
 def write_file_to_record(battle_id=0, ver='', score=0, win_score=2048, width='4', height='4', result=''):
     sql = 'insert into record (' \
           'battle_id,' \
@@ -90,7 +85,6 @@ def write_file_to_record(battle_id=0, ver='', score=0, win_score=2048, width='4'
     record = (battle_id, ver, score, win_score, width, height, result)
     c.execute(sql, record)
     conn.commit()
-
 
 # 更新record表中的信息
 def write_file_to_record_update(battle_id,score,result):
@@ -138,14 +132,12 @@ def get_field_to_str(field):
         row_str_all += " "+row_str
     return row_str_all
 
-
 # 键盘值的获取，如果不在actions_dict里面就继续监听按键，如果在actions_dict里面就返回对应的操作。
 def get_user_action(keyboard):
     char = "N"
     while char not in actions_dict:
         char = keyboard.getch()
     return actions_dict[char]
-
 
 def get_machine_direction(field):
     # direction=choice(actions1)

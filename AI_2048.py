@@ -6,8 +6,10 @@ minSearchTime = 100
 class AI_2048():
     def __init__(self, grid):
         # // grid是当前的16个cell里面的数字列表 [[2,2,2,2],[2,2,2,2],[2,2,2,2],[2,2,2,2]]  and playerTurn
+        # grid是一个类的实例，grid的实例
         self.grid = grid
-        self.original_grid = grid
+        self.original_grid_list = grid.current_grid
+        # 输出grid里面包括的2维数组列表，通过get_current_grid这个方法
         self.out(self.grid.get_current_grid())
 
     def get_field_to_str(self, field):
@@ -53,6 +55,12 @@ class AI_2048():
             # + self.grid.monotonicity() * monoWeight
             # - self.grid.islands() * islandWeight
 
+    def direction_convert(self, direction):
+        # //direction   0: up, 1: right, 2: down, 3: left
+        rule = ['Up', 'Right', 'Down', 'Left']
+        print(rule[direction])
+        return rule[direction]
+
     # // alpha-beta depth first search
     def search(self, depth, alpha, beta, positions, cutoffs):
         bestScore = 0
@@ -63,8 +71,9 @@ class AI_2048():
         if (self.grid.playerTurn):
             bestScore = alpha
             for direction in [0, 1, 2, 3]:
-                newGrid = grid(self.original_grid)
-                if newGrid.move(direction):
+                direction_int_convert_str = self.direction_convert(direction)
+                newGrid = grid(self.original_grid_list)
+                if newGrid.move(direction_int_convert_str):
                     positions += 1
                     if newGrid.is_win():
                         return {'move': direction, 'score': 10000, 'positions': positions, 'cutoffs': cutoffs}
@@ -72,7 +81,8 @@ class AI_2048():
                     newAI = AI_2048(newGrid)
 
                     if depth == 0:
-                        result = { 'move': direction, 'score': newAI.eval()}
+                        new_ai_eval = newAI.eval()
+                        result = { 'move': direction, 'score': new_ai_eval}
                     else:
                         result = newAI.search(depth-1, bestScore, beta, positions, cutoffs)
                         # // win
@@ -123,7 +133,7 @@ class AI_2048():
             for i in range(len(candidates)):
                 position = candidates[i]['position']
                 value = candidates[i]['value']
-                newGrid = self.original_grid
+                newGrid = self.original_grid_list
                 newGrid[position[0]][position[1]] = value
                 newGrid.playerTurn = True
                 positions += 1

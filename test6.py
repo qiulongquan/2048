@@ -1,14 +1,20 @@
-import json
+# //direction   0: up, 1: right, 2: down, 3: left
+for i in range(4):
+    rule = ['Up', 'Right', 'Down', 'Left']
+    print(rule[i])
 
-# some JSON:
-# json的基本形式  字典的最外层加入一对单引号就可以成为json
-x = '{ "name":"John", "age":30, "city":"New York"}'
 
-# parse x:
-y = json.loads(x)
-
-# the result is a Python dictionary:
-print(y["age"])
+# import json
+#
+# # some JSON:
+# # json的基本形式  字典的最外层加入一对单引号就可以成为json
+# x = '{ "name":"John", "age":30, "city":"New York"}'
+#
+# # parse x:
+# y = json.loads(x)
+#
+# # the result is a Python dictionary:
+# print(y["age"])
 
 
 # 有break的时候,直接退出while，只显示一次0

@@ -5,10 +5,8 @@ import math
 def transpose(field):
     return [list(row) for row in zip(*field)]
 
-
 def invert(field):
     return [row[::-1] for row in field]
-
 
 def move_is_possible(direction, field1):
     def row_is_left_movable(row):
@@ -39,7 +37,6 @@ def move_is_possible(direction, field1):
         return check[direction](field1)
     else:
         return False
-
 
 class grid():
 
@@ -125,14 +122,15 @@ class grid():
         smoothness = 0
         for x in range(len(self.current_grid)):
             for y in range(len(self.current_grid[x])):
-                list1=[x,y]
-                use_value = self.cellAvailable(list1)
+                list1 = [x, y]
+                use_value = self.cellContent(list1)
                 if use_value:
                     value = math.log(self.cellContent(list1))/math.log(2)
                     direction = 1
                     while direction <= 2:
                         vector = self.getVector(direction)
-                        targetCell = self.findFarthestPosition(list1, vector)['next']
+                        list1_convert={'x':list1[0],'y':list1[1]}
+                        targetCell = self.findFarthestPosition(list1_convert, vector)['next']
                         list1 = [targetCell['x'], targetCell['y']]
                         if self.cellOccupied(list1):
                             target = self.cellContent(list1)
@@ -265,10 +263,13 @@ class grid():
         return vector[direction]
 
     def cellOccupied(self, list1):
-        if self.current_grid[list1[0]][list1[1]] == 0:
-            return False
+        if self.withinBounds(list1):
+            if self.current_grid[list1[0]][list1[1]] == 0:
+                return False
+            else:
+                return True
         else:
-            return True
+            return False
 
     def withinBounds(self, list1):
         size = len(self.current_grid)
@@ -283,11 +284,10 @@ class grid():
         # // Progress towards the vector direction until an obstacle is found
         while True:
             previous = cell
-            cell = {'x': previous[0] + vector['x'], 'y': previous[1] + vector['y']}
+            cell = {'x': previous['x'] + vector['x'], 'y': previous['y'] + vector['y']}
             list1 = [cell['x'], cell['y']]
             if not (self.withinBounds(list1) and self.cellAvailable(list1)):
                 break
-
         # // Used to check if a merge is required
         return {'farthest': previous, 'next': cell}
 
