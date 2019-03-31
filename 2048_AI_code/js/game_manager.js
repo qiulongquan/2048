@@ -20,7 +20,7 @@ function GameManager(size, InputManager, Actuator) {
       this.actuator.setRunButton('Auto-run');
     } else {
       this.running = true;
-      this.run()
+      this.run();
       this.actuator.setRunButton('Stop');
     }
   }.bind(this));
@@ -38,6 +38,7 @@ GameManager.prototype.restart = function () {
 
 // Set up the game
 GameManager.prototype.setup = function () {
+  // 创建grid的实例化
   this.grid         = new Grid(this.size);
   this.grid.addStartTiles();
 
@@ -81,17 +82,26 @@ GameManager.prototype.move = function(direction) {
   }
 
   this.actuate();
-}
+};
 
 // moves continuously until game is over
 GameManager.prototype.run = function() {
   var best = this.ai.getBest();
+  // 将best返回的json变成string 然后全部输出
+  var str = JSON.stringify(best);
+  // 输出到浏览器的控制台
+  console.log(str); //string
+  // 通过alert弹出对话框显示数值
+  // window.alert(str);
+
   this.move(best.move);
   var timeout = animationDelay;
+  // 每走一步就停下来  按钮按下后继续下一步，然后在停下来
+  this.running=false;
   if (this.running && !this.over && !this.won) {
     var self = this;
     setTimeout(function(){
       self.run();
     }, timeout);
   }
-}
+};

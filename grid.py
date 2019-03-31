@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 # file1d这个地方的值是grid的实例
 # type object argument after * must be an iterable, not grid
@@ -120,23 +121,32 @@ class grid():
     # // Note that the pieces can be distant
     def smoothness(self):
         smoothness = 0
-        for x in range(len(self.current_grid)):
-            for y in range(len(self.current_grid[x])):
+        for x in range(len(np.transpose(self.current_grid))):
+            for y in range(len(np.transpose(self.current_grid)[x])):
                 list1 = [x, y]
+                # 注意，因为原始代码x，y轴是颠倒的，所以需要改变x y对应的坐标
+                list1 = [y, x]
                 use_value = self.cellContent(list1)
                 if use_value:
+                    print("x={},y={},value1={}".format(y, x,self.cellContent(list1)))
                     value = math.log(self.cellContent(list1))/math.log(2)
+                    print("value= ",value)
                     direction = 1
                     while direction <= 2:
                         vector = self.getVector(direction)
                         list1_convert={'x':list1[0],'y':list1[1]}
                         targetCell = self.findFarthestPosition(list1_convert, vector)['next']
+                        print("targetCell= ",targetCell)
                         list1 = [targetCell['x'], targetCell['y']]
                         if self.cellOccupied(list1):
                             target = self.cellContent(list1)
+                            print("target= ", target)
                             targetValue = math.log(target) / math.log(2)
+                            print("targetValue= ", targetValue)
                             smoothness -= abs(value - targetValue)
+                            print("smoothness_temp= ",smoothness)
                         direction += 1
+        print("smoothness= ",smoothness)
         return smoothness
 
     # measures how monotonic the grid is. This means the values of the tiles are strictly increasing
@@ -145,7 +155,7 @@ class grid():
         # // scores for all four directions
         totals = [0, 0, 0, 0]
         size = len(self.current_grid)
-        for x in size:
+        for x in range(size):
             current = 0
             next = current + 1
             while next < 4:
@@ -172,7 +182,7 @@ class grid():
                 next += 1
 
     # // left / right  direction
-        for y in size:
+        for y in range(size):
             current = 0
             next = current + 1
             while next < 4:
@@ -198,7 +208,8 @@ class grid():
                 current = next
                 next += 1
 
-        return math.max(totals[0], totals[2]) + math.max(totals[3], totals[1])
+        print("monotonicity2= ",(max(totals[0], totals[2]) + max(totals[3], totals[1])))
+        return max(totals[0], totals[2]) + max(totals[3], totals[1])
 
     def maxValue(self):
         max = 0
@@ -206,7 +217,9 @@ class grid():
             for y in range(len(self.current_grid[x])):
                 if self.current_grid[x][y] > max:
                     max = self.current_grid[x][y]
-        return max
+
+        print("maxValue=",(math.log(max) / math.log(2)))
+        return math.log(max) / math.log(2)
 
     # // counts the number of isolated groups.
     def islands(self):

@@ -1,4 +1,5 @@
 function AI(grid) {
+  // grid是一个实例化对象 里面包括一个2维数组和参数
   this.grid = grid;
   // grid是当前的16个cell里面的数字列表  and playerTurn
   // document.write("grid="+grid);
@@ -10,6 +11,7 @@ AI.prototype.eval = function() {
   // emptyCells 这个是当前为0的cell的个数
   var emptyCells = this.grid.availableCells().length;
   // document.write("emptyCells="+emptyCells);
+  console.log("emptyCells= ",emptyCells);
 
   var smoothWeight = 0.1,
       //monoWeight   = 0.0,
@@ -18,6 +20,13 @@ AI.prototype.eval = function() {
       emptyWeight  = 2.7,
       maxWeight    = 1.0;
 
+  // a=this.grid.smoothness();
+  // b=this.grid.monotonicity2();
+  // c=Math.log(emptyCells);
+  // d=this.grid.maxValue();
+  //
+  // res=a*smoothWeight+b*mono2Weight+c*emptyWeight+d*maxWeight;
+  // console.log("result=%f",res);
   // 最后算出一个格局评价的值然后返回
   return this.grid.smoothness() * smoothWeight
        //+ this.grid.monotonicity() * monoWeight
@@ -37,6 +46,7 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
   if (this.grid.playerTurn) {
     bestScore = alpha;
     for (var direction in [0, 1, 2, 3]) {
+      // newGrid包括playerTurn=true和一个最新的2维数组状态
       var newGrid = this.grid.clone();
       if (newGrid.move(direction).moved) {
         positions++;
@@ -55,13 +65,15 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
           positions = result.positions;
           cutoffs = result.cutoffs;
         }
+        console.log(result);
 
         if (result.score > bestScore) {
           bestScore = result.score;
           bestMove = direction;
         }
         if (bestScore > beta) {
-          cutoffs++
+          cutoffs++;
+          console.log({ move: bestMove, score: beta, positions: positions, cutoffs: cutoffs });
           return { move: bestMove, score: beta, positions: positions, cutoffs: cutoffs };
         }
       }
@@ -128,20 +140,26 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
   }
 
   return { move: bestMove, score: bestScore, positions: positions, cutoffs: cutoffs };
-}
+};
 
 // performs a search and returns the best move
 AI.prototype.getBest = function() {
   return this.iterativeDeep();
-}
+};
 
 // performs iterative deepening over the alpha-beta search
 AI.prototype.iterativeDeep = function() {
   var start = (new Date()).getTime();
   var depth = 0;
   var best;
+  console.log("本次search开始");
+  // window.alert("本次search开始");
   do {
     var newBest = this.search(depth, -10000, 10000, 0 ,0);
+    var str1 = JSON.stringify(newBest);
+    console.log(str1);
+    // window.alert(str1);
+
     if (newBest.move == -1) {
       break;
     } else {
@@ -149,8 +167,10 @@ AI.prototype.iterativeDeep = function() {
     }
     depth++;
   } while ( (new Date()).getTime() - start < minSearchTime);
+  console.log("本次search结束");
+  // window.alert("本次search结束");
   return best
-}
+};
 
 AI.prototype.translate = function(move) {
  return {
@@ -159,4 +179,4 @@ AI.prototype.translate = function(move) {
     2: 'down',
     3: 'left'
   }[move];
-}
+};

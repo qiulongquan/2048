@@ -151,8 +151,7 @@ def get_machine_direction(field):
     # //direction   0: up, 1: right, 2: down, 3: left
     # direction是英文文字 Up，Right，Down，Left
     # ai_2048_exec_after['move']返回来的是一个数字然后根据rule里面的对照关系返回因为字母Up，Right，Down，Left给direction
-    n = ai_2048_exec_after['move']
-    direction = rule[n]
+    direction = rule[ai_2048_exec_after['move']]
     # print("方向操作:",direction)
     return direction
 

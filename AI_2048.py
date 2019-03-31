@@ -1,5 +1,6 @@
 import math
 import time
+import json
 from grid import grid
 minSearchTime = 100
 
@@ -14,13 +15,13 @@ class AI_2048():
 
     def get_field_to_str(self, field):
         row_str = ''
-        row_str_all = ''
+        row_str_all = "\n"
         for row in field:
             for i in range(len(row)):
                 maped_num = map(str, row)  # 格納される数値を文字列にする
                 row_str = ','.join(maped_num)
-            row_str_all += " " + row_str
-        return row_str_all
+            row_str_all += row_str + "\n"
+        return row_str_all + "=" * 30
 
     def out(self, info):
         f = open("out.txt", 'a+')
@@ -39,7 +40,7 @@ class AI_2048():
     def eval(self):
         # emptyCells 这个是当前为0的cell的个数
         emptyCells = self.availableCells_length()
-
+        print("emptyCells= ",emptyCells)
         smoothWeight = 0.1
         # monoWeight   = 0.0,
         # islandWeight = 0.0,
@@ -58,7 +59,7 @@ class AI_2048():
     def direction_convert(self, direction):
         # //direction   0: up, 1: right, 2: down, 3: left
         rule = ['Up', 'Right', 'Down', 'Left']
-        print(rule[direction])
+        # print(rule[direction])
         return rule[direction]
 
     # // alpha-beta depth first search
@@ -72,17 +73,17 @@ class AI_2048():
             bestScore = alpha
             for direction in [0, 1, 2, 3]:
                 direction_int_convert_str = self.direction_convert(direction)
-                newGrid = grid(self.original_grid_list)
+                # newGrid = grid(self.original_grid_list)
+                newGrid = grid(self.grid.current_grid)
                 if newGrid.move(direction_int_convert_str):
                     positions += 1
                     if newGrid.is_win():
                         return {'move': direction, 'score': 10000, 'positions': positions, 'cutoffs': cutoffs}
 
                     newAI = AI_2048(newGrid)
-
                     if depth == 0:
                         new_ai_eval = newAI.eval()
-                        result = { 'move': direction, 'score': new_ai_eval}
+                        result = {'move': direction, 'score': new_ai_eval}
                     else:
                         result = newAI.search(depth-1, bestScore, beta, positions, cutoffs)
                         # // win
@@ -91,6 +92,7 @@ class AI_2048():
                             result['score'] -= 1
                         positions = result['positions']
                         cutoffs = result['cutoffs']
+                    print(result)
 
                     if result['score'] > bestScore:
                         bestScore = result['score']
@@ -98,7 +100,8 @@ class AI_2048():
 
                     if bestScore > beta:
                         cutoffs += 1
-                        return { 'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs }
+                        print({'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs })
+                        return {'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs }
 
         # // computer's turn, we'll do heavy pruning to keep the branching factor low
         else:
@@ -119,7 +122,7 @@ class AI_2048():
                             cells[i][n]=value
                             scores[value][i][0] = - self.grid.smoothness() + self.grid.islands()
                             scores[value][i][1] =[i,n]
-                            cells[i][n]=0
+                            cells[i][n] = 0
 
         # // now just pick out the most annoying moves
             maxScore = (max(max(scores[2]),max(scores[4])))
@@ -133,8 +136,8 @@ class AI_2048():
             for i in range(len(candidates)):
                 position = candidates[i]['position']
                 value = candidates[i]['value']
-                newGrid = self.original_grid_list
-                newGrid[position[0]][position[1]] = value
+                newGrid = grid(self.grid.current_grid)
+                newGrid.current_grid[position[0]][position[1]] = value
                 newGrid.playerTurn = True
                 positions += 1
                 newAI = AI_2048(newGrid)
@@ -146,7 +149,7 @@ class AI_2048():
                     bestScore = result['score']
 
                 if bestScore < alpha:
-                    cutoffs+=1
+                    cutoffs += 1
                     return {'move': '', 'score': alpha, 'positions': positions, 'cutoffs': cutoffs}
 
         return {'move': bestMove, 'score': bestScore, 'positions': positions, 'cutoffs': cutoffs}
@@ -165,6 +168,7 @@ class AI_2048():
         best = {}
         while True:
             newBest = self.search(depth, -10000, 10000, 0, 0)
+            print(newBest)
             if newBest['move'] == -1:
                 break
             else:

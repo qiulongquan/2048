@@ -1,7 +1,26 @@
+import numpy as np
+# a = np.arange(12).reshape(3, 4)
+field=[[4,8,32,16],[2,0,4,4],[0,0,0,2],[0,0,0,0]]
+print('原数组：')
+print(field)
+print('\n')
+
+print('对换数组：')
+print(np.transpose(field))
+print(np.transpose(field)[3][0])
+
+# a=1
+# if a is not 0:
+#     print("ok")
+
+# import math
+# a=math.log(16) / math.log(2)
+# print (a)
+
 # //direction   0: up, 1: right, 2: down, 3: left
-for i in range(4):
-    rule = ['Up', 'Right', 'Down', 'Left']
-    print(rule[i])
+# for i in range(4):
+#     rule = ['Up', 'Right', 'Down', 'Left']
+#     print(rule[i])
 
 
 # import json
