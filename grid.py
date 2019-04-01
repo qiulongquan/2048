@@ -122,31 +122,34 @@ class grid():
     def smoothness(self):
         smoothness = 0
         for x in range(len(np.transpose(self.current_grid))):
-            for y in range(len(np.transpose(self.current_grid)[x])):
+            for y in range(len(np.transpose(self.current_grid[x]))):
                 list1 = [x, y]
-                # 注意，因为原始代码x，y轴是颠倒的，所以需要改变x y对应的坐标
-                list1 = [y, x]
-                use_value = self.cellContent(list1)
+                # 注意，因为原始代码x，y轴是颠倒的，所以需要np.transpose改变x y对应的坐标
+                current_grid_transpose = np.transpose(self.current_grid)
+                use_value = current_grid_transpose[x][y]
                 if use_value:
-                    print("x={},y={},value1={}".format(y, x,self.cellContent(list1)))
-                    value = math.log(self.cellContent(list1))/math.log(2)
-                    print("value= ",value)
+                    print("x={},y={},value1={}".format(x, y, current_grid_transpose[x][y]))
+                    value = math.log(current_grid_transpose[x][y])/math.log(2)
+                    # print("value= ", value)
                     direction = 1
                     while direction <= 2:
                         vector = self.getVector(direction)
-                        list1_convert={'x':list1[0],'y':list1[1]}
+                        # print("vector= ", vector)
+                        list1_convert = {'x': list1[0], 'y': list1[1]}
+                        # print("list1_convert= ", list1_convert)
                         targetCell = self.findFarthestPosition(list1_convert, vector)['next']
-                        print("targetCell= ",targetCell)
-                        list1 = [targetCell['x'], targetCell['y']]
-                        if self.cellOccupied(list1):
-                            target = self.cellContent(list1)
-                            print("target= ", target)
+                        # print("targetCell= ", targetCell)
+                        targetCell_list = [targetCell['x'], targetCell['y']]
+
+                        if self.cellOccupied_transpose(targetCell_list):
+                            target = self.cellContent_transpose(targetCell_list)
+                            # print("target= ", target)
                             targetValue = math.log(target) / math.log(2)
-                            print("targetValue= ", targetValue)
+                            # print("targetValue= ", targetValue)
                             smoothness -= abs(value - targetValue)
-                            print("smoothness_temp= ",smoothness)
+                            print("smoothness_temp= ", smoothness)
                         direction += 1
-        print("smoothness= ",smoothness)
+        print("smoothness= ", smoothness)
         return smoothness
 
     # measures how monotonic the grid is. This means the values of the tiles are strictly increasing
@@ -291,6 +294,29 @@ class grid():
         else:
             return False
 
+    def cellOccupied_transpose(self, list1):
+        if self.withinBounds(list1):
+            if np.transpose(self.current_grid)[list1[0]][list1[1]] == 0:
+                return False
+            else:
+                return True
+        else:
+            return False
+
+    def cellAvailable_transpose(self, list1):
+        use_value = ''
+        if np.transpose(self.current_grid)[list1[0]][list1[1]] == 0:
+            use_value = False
+            use_value = True
+        else:
+            use_value = True
+            use_value = False
+        return use_value
+
+    def cellContent_transpose(self, list1):
+        if self.withinBounds(list1):
+            return np.transpose(self.current_grid)[list1[0]][list1[1]]
+
     def findFarthestPosition(self, cell, vector):
         previous = []
         # cell sample   cell=[x,y]
@@ -299,7 +325,7 @@ class grid():
             previous = cell
             cell = {'x': previous['x'] + vector['x'], 'y': previous['y'] + vector['y']}
             list1 = [cell['x'], cell['y']]
-            if not (self.withinBounds(list1) and self.cellAvailable(list1)):
+            if not (self.withinBounds(list1) and self.cellAvailable_transpose(list1)):
                 break
         # // Used to check if a merge is required
         return {'farthest': previous, 'next': cell}

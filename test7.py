@@ -1,8 +1,17 @@
-count=[]
-a=[1,2,3,4,4,5]
-for i in range(3):
-    count.append(len(a))
-print(count[0])
+import numpy as np
+field=[[4,0,32,8],[0,0,0,0],[0,0,0,0],[0,0,2,0]]
+print(field[0][2])
+a=np.transpose(field)
+
+print(a)
+print(a[0][2])
+
+
+# count=[]
+# a=[1,2,3,4,4,5]
+# for i in range(3):
+#     count.append(len(a))
+# print(count[0])
 
 
 

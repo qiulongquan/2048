@@ -382,17 +382,19 @@ Grid.prototype.smoothness = function() {
         console.log("x=%d,y=%d,value1=%d",x,y,this.cellContent( this.indexes[x][y] ).value);
         // 当前cell里面的值提取然后log运算
         var value = Math.log(this.cellContent( this.indexes[x][y] ).value) / Math.log(2);
-        console.log("value= ",value);
+        // console.log("value= ",value);
         for (var direction=1; direction<=2; direction++) {
           // 获取direction对应的vector值
           var vector = this.getVector(direction);
+          // console.log("vector= ", vector)
+          // console.log("this.indexes[x][y]= ", this.indexes[x][y])
           var targetCell = this.findFarthestPosition(this.indexes[x][y], vector).next;
-          console.log("targetCell= ",targetCell);
+          // console.log("targetCell= ",targetCell);
           if (this.cellOccupied(targetCell)) {
             var target = this.cellContent(targetCell);
-            console.log("target= ",target);
+            // console.log("target= ",target);
             var targetValue = Math.log(target.value) / Math.log(2);
-            console.log("targetValue= ",targetValue);
+            // console.log("targetValue= ",targetValue);
             smoothness -= Math.abs(value - targetValue);
             console.log("smoothness_temp= ",smoothness)
           }
