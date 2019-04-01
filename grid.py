@@ -128,7 +128,7 @@ class grid():
                 current_grid_transpose = np.transpose(self.current_grid)
                 use_value = current_grid_transpose[x][y]
                 if use_value:
-                    print("x={},y={},value1={}".format(x, y, current_grid_transpose[x][y]))
+                    # print("x={},y={},value1={}".format(x, y, current_grid_transpose[x][y]))
                     value = math.log(current_grid_transpose[x][y])/math.log(2)
                     # print("value= ", value)
                     direction = 1
@@ -147,9 +147,9 @@ class grid():
                             targetValue = math.log(target) / math.log(2)
                             # print("targetValue= ", targetValue)
                             smoothness -= abs(value - targetValue)
-                            print("smoothness_temp= ", smoothness)
+                            # print("smoothness_temp= ", smoothness)
                         direction += 1
-        print("smoothness= ", smoothness)
+        # print("smoothness= ", smoothness)
         return smoothness
 
     # measures how monotonic the grid is. This means the values of the tiles are strictly increasing
@@ -211,7 +211,7 @@ class grid():
                 current = next
                 next += 1
 
-        print("monotonicity2= ",(max(totals[0], totals[2]) + max(totals[3], totals[1])))
+        # print("monotonicity2= ",(max(totals[0], totals[2]) + max(totals[3], totals[1])))
         return max(totals[0], totals[2]) + max(totals[3], totals[1])
 
     def maxValue(self):
@@ -221,7 +221,7 @@ class grid():
                 if self.current_grid[x][y] > max:
                     max = self.current_grid[x][y]
 
-        print("maxValue=",(math.log(max) / math.log(2)))
+        # print("maxValue=",(math.log(max) / math.log(2)))
         return math.log(max) / math.log(2)
 
     # // counts the number of isolated groups.

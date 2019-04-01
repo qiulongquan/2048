@@ -11,7 +11,7 @@ AI.prototype.eval = function() {
   // emptyCells 这个是当前为0的cell的个数
   var emptyCells = this.grid.availableCells().length;
   // document.write("emptyCells="+emptyCells);
-  console.log("emptyCells= ",emptyCells);
+  // console.log("emptyCells= ",emptyCells);
 
   var smoothWeight = 0.1,
       //monoWeight   = 0.0,
@@ -65,7 +65,8 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
           positions = result.positions;
           cutoffs = result.cutoffs;
         }
-        console.log(result);
+        var result_str = JSON.stringify(result);
+        console.log("self.grid.playerTurn=True ",result_str);
 
         if (result.score > bestScore) {
           bestScore = result.score;
@@ -73,7 +74,8 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
         }
         if (bestScore > beta) {
           cutoffs++;
-          console.log({ move: bestMove, score: beta, positions: positions, cutoffs: cutoffs });
+          var result_str1 = JSON.stringify({ move: bestMove, score: beta, positions: positions, cutoffs: cutoffs });
+          console.log("self.grid.playerTurn=True ",result_str1);
           return { move: bestMove, score: beta, positions: positions, cutoffs: cutoffs };
         }
       }
@@ -157,7 +159,7 @@ AI.prototype.iterativeDeep = function() {
   do {
     var newBest = this.search(depth, -10000, 10000, 0 ,0);
     var str1 = JSON.stringify(newBest);
-    console.log(str1);
+    console.log("newBest_%d=",depth,str1);
     // window.alert(str1);
 
     if (newBest.move == -1) {
@@ -169,6 +171,8 @@ AI.prototype.iterativeDeep = function() {
   } while ( (new Date()).getTime() - start < minSearchTime);
   console.log("本次search结束");
   // window.alert("本次search结束");
+  var best_str = JSON.stringify(best);
+  console.log("best=",best_str);
   return best
 };
 

@@ -40,7 +40,7 @@ class AI_2048():
     def eval(self):
         # emptyCells 这个是当前为0的cell的个数
         emptyCells = self.availableCells_length()
-        print("emptyCells= ",emptyCells)
+        # print("emptyCells= ",emptyCells)
         smoothWeight = 0.1
         # monoWeight   = 0.0,
         # islandWeight = 0.0,
@@ -92,7 +92,7 @@ class AI_2048():
                             result['score'] -= 1
                         positions = result['positions']
                         cutoffs = result['cutoffs']
-                    print(result)
+                    print("self.grid.playerTurn=True ",result)
 
                     if result['score'] > bestScore:
                         bestScore = result['score']
@@ -100,12 +100,13 @@ class AI_2048():
 
                     if bestScore > beta:
                         cutoffs += 1
-                        print({'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs })
+                        print("self.grid.playerTurn=True ",{'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs })
                         return {'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs }
 
         # // computer's turn, we'll do heavy pruning to keep the branching factor low
         else:
             bestScore = beta
+            print("------self.grid.playerTurn=False-------")
         # try a 2 and 4 in each cell and measure how annoying it is
         # with metrics from eval
             candidates = []
@@ -168,7 +169,7 @@ class AI_2048():
         best = {}
         while True:
             newBest = self.search(depth, -10000, 10000, 0, 0)
-            print(newBest)
+            print("newBest_{}={}".format(depth,newBest))
             if newBest['move'] == -1:
                 break
             else:

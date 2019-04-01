@@ -379,7 +379,7 @@ Grid.prototype.smoothness = function() {
     for (var y=0; y<4; y++) {
       // 先通过this.cellOccupied( this.indexes[x][y]找到cell里面非0的值，然后在进行后面的运算
       if (this.cellOccupied( this.indexes[x][y])){
-        console.log("x=%d,y=%d,value1=%d",x,y,this.cellContent( this.indexes[x][y] ).value);
+        // console.log("x=%d,y=%d,value1=%d",x,y,this.cellContent( this.indexes[x][y] ).value);
         // 当前cell里面的值提取然后log运算
         var value = Math.log(this.cellContent( this.indexes[x][y] ).value) / Math.log(2);
         // console.log("value= ",value);
@@ -396,13 +396,13 @@ Grid.prototype.smoothness = function() {
             var targetValue = Math.log(target.value) / Math.log(2);
             // console.log("targetValue= ",targetValue);
             smoothness -= Math.abs(value - targetValue);
-            console.log("smoothness_temp= ",smoothness)
+            // console.log("smoothness_temp= ",smoothness)
           }
         }
       }
     }
   }
-  console.log("smoothness= ",smoothness);
+  // console.log("smoothness= ",smoothness);
   return smoothness;
 };
 
@@ -530,7 +530,7 @@ Grid.prototype.monotonicity2 = function() {
       next++;
     }
   }
-  console.log("monotonicity2= ",(Math.max(totals[0], totals[1]) + Math.max(totals[2], totals[3])));
+  // console.log("monotonicity2= ",(Math.max(totals[0], totals[1]) + Math.max(totals[2], totals[3])));
   return Math.max(totals[0], totals[1]) + Math.max(totals[2], totals[3]);
 };
 
@@ -546,7 +546,7 @@ Grid.prototype.maxValue = function() {
       }
     }
   }
-  console.log("maxValue= ",(Math.log(max) / Math.log(2)));
+  // console.log("maxValue= ",(Math.log(max) / Math.log(2)));
   return Math.log(max) / Math.log(2);
 };
 
