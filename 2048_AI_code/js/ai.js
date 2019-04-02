@@ -66,7 +66,7 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
           cutoffs = result.cutoffs;
         }
         var result_str = JSON.stringify(result);
-        console.log("self.grid.playerTurn=True ",result_str);
+        console.log("result返回值 self.grid.playerTurn=True ",result_str);
 
         if (result.score > bestScore) {
           bestScore = result.score;
@@ -75,7 +75,7 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
         if (bestScore > beta) {
           cutoffs++;
           var result_str1 = JSON.stringify({ move: bestMove, score: beta, positions: positions, cutoffs: cutoffs });
-          console.log("self.grid.playerTurn=True ",result_str1);
+          console.log("bestScore > beta cutoff加1 剪切掉 self.grid.playerTurn=True ",result_str1);
           return { move: bestMove, score: beta, positions: positions, cutoffs: cutoffs };
         }
       }
@@ -136,6 +136,8 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
       }
       if (bestScore < alpha) {
         cutoffs++;
+        var result_str2 = JSON.stringify({ move: null, score: alpha, positions: positions, cutoffs: cutoffs });
+        console.log("self.grid.playerTurn=False ",result_str2);
         return { move: null, score: alpha, positions: positions, cutoffs: cutoffs };
       }
     }
