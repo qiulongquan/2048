@@ -84,7 +84,7 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
 
   else { // computer's turn, we'll do heavy pruning to keep the branching factor low
     bestScore = beta;
-
+    console.log("------self.grid.playerTurn=False-------")
     // try a 2 and 4 in each cell and measure how annoying it is
     // with metrics from eval
     var candidates = [];

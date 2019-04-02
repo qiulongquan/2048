@@ -14,7 +14,6 @@ print(a[0][2])
 # print(count[0])
 
 
-
 # import traceback
 #
 #

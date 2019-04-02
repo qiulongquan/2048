@@ -153,6 +153,8 @@ def get_machine_direction(field):
     # ai_2048_exec_after['move']返回来的是一个数字然后根据rule里面的对照关系返回因为字母Up，Right，Down，Left给direction
     direction = rule[ai_2048_exec_after['move']]
     # print("方向操作:",direction)
+    ai_2048.player_turn_change()
+
     return direction
 
 def transpose(field):
@@ -229,9 +231,12 @@ class GameField(object):
                 global digital_set_after
                 digital_set_after = get_field_to_str(self.field)
 
+                # 改变palyturn的值为false
+                # self.playturn = False
                 return True
             else:
                 return False
+
 
     def is_win(self):
         if any(any(i >= self.win_value for i in row) for row in self.field):

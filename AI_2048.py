@@ -13,6 +13,9 @@ class AI_2048():
         # 输出grid里面包括的2维数组列表，通过get_current_grid这个方法
         self.out(self.grid.get_current_grid())
 
+    def player_turn_change(self):
+        self.grid.playerTurn = False
+
     def get_field_to_str(self, field):
         row_str = ''
         row_str_all = "\n"
@@ -92,7 +95,7 @@ class AI_2048():
                             result['score'] -= 1
                         positions = result['positions']
                         cutoffs = result['cutoffs']
-                    print("self.grid.playerTurn=True ",result)
+                    print("self.grid.playerTurn=True ", result)
 
                     if result['score'] > bestScore:
                         bestScore = result['score']
@@ -100,8 +103,8 @@ class AI_2048():
 
                     if bestScore > beta:
                         cutoffs += 1
-                        print("self.grid.playerTurn=True ",{'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs })
-                        return {'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs }
+                        print("bestScore > beta  self.grid.playerTurn=True ", {'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs })
+                        return {'move': bestMove, 'score': beta, 'positions': positions, 'cutoffs': cutoffs}
 
         # // computer's turn, we'll do heavy pruning to keep the branching factor low
         else:
@@ -119,14 +122,14 @@ class AI_2048():
                     # scores的格式sample
                     # scores = {2: [[2, [0, 2]], [5, [1, 3]], [7, [0, 4]]],
                     #           4: [[21, [10, 21]], [51, [2, 31]], [71, [0, 41]]]}
-                        if cells[i][n]==0:
-                            cells[i][n]=value
+                        if cells[i][n] == 0:
+                            cells[i][n] = value
                             scores[value][i][0] = - self.grid.smoothness() + self.grid.islands()
-                            scores[value][i][1] =[i,n]
+                            scores[value][i][1] = [i, n]
                             cells[i][n] = 0
 
         # // now just pick out the most annoying moves
-            maxScore = (max(max(scores[2]),max(scores[4])))
+            maxScore = (max(max(scores[2]), max(scores[4])))
             # // 2 and 4
             for value in scores:
                 for i in range(len(scores[value])):
@@ -153,6 +156,7 @@ class AI_2048():
                     cutoffs += 1
                     return {'move': '', 'score': alpha, 'positions': positions, 'cutoffs': cutoffs}
 
+        # print("search return result", {'move': bestMove, 'score': bestScore, 'positions': positions, 'cutoffs': cutoffs})
         return {'move': bestMove, 'score': bestScore, 'positions': positions, 'cutoffs': cutoffs}
 
     #  // performs a search and returns the best move
@@ -169,7 +173,7 @@ class AI_2048():
         best = {}
         while True:
             newBest = self.search(depth, -10000, 10000, 0, 0)
-            print("newBest_{}={}".format(depth,newBest))
+            print("search return result. newBest_{}={}".format(depth, newBest))
             if newBest['move'] == -1:
                 break
             else:

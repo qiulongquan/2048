@@ -2,7 +2,7 @@ from AI_2048 import AI_2048
 from grid import grid
 
 rule = ['Up', 'Right', 'Down', 'Left']
-field=[[2,0,0,4],[0,0,2,4],[0,0,0,0],[0,0,0,0]]
+field=[[8,4,4,0],[2,0,2,0],[0,0,0,0],[0,0,0,0]]
 # 实例化一个grid生成newgrid，然后把newgrid作为参数实例化AI_search
 newgrid = grid(current_grid=field)
 ai_2048 = AI_2048(grid=newgrid)
