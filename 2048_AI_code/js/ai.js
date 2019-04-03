@@ -47,9 +47,12 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
     bestScore = alpha;
     for (var direction in [0, 1, 2, 3]) {
       // newGrid包括playerTurn=true和一个最新的2维数组状态
+      console.log("direction = ",direction)
+      console.log("  depth = %d , positions = %d ---------",depth,positions)
       var newGrid = this.grid.clone();
       if (newGrid.move(direction).moved) {
         positions++;
+        console.log("移动成功 , positions = %d",positions)
         if (newGrid.isWin()) {
           return { move: direction, score: 10000, positions: positions, cutoffs: cutoffs };
         }
@@ -79,6 +82,7 @@ AI.prototype.search = function(depth, alpha, beta, positions, cutoffs) {
           return { move: bestMove, score: beta, positions: positions, cutoffs: cutoffs };
         }
       }
+      else{console.log("direction方向无法移动 ",direction)}
     }
   }
 
@@ -159,6 +163,7 @@ AI.prototype.iterativeDeep = function() {
   console.log("本次search开始");
   // window.alert("本次search开始");
   do {
+    console.log("-------depth = %d----------",depth)
     var newBest = this.search(depth, -10000, 10000, 0 ,0);
     var str1 = JSON.stringify(newBest);
     console.log("newBest_%d=",depth,str1);
