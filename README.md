@@ -49,20 +49,6 @@ battle_id  int	step  int       new_digital   int     	coordinate  char
 Direction  string	digital_set_before  list	digital_set_after  list
 
 
-# 算法概述
-先根据search里面的eval函数算出score的分数
-Score分数包括4个部分
-每个部分算出来以后，会有一个格局评价---启发指标采用了加权策略
-算出一个格局评价的值然后返回
-
-然后比较score分数，找到最大的值
-
-返回后在iterativeDeep里面判断
-如果move方向是-1 就退出 然后返回上次best值为此次查询的最佳方向
-如果move不是-1 就把本次newbest保存给best然后depth加1（深度加1）
-深度越大 计算量越多，positions的值越大。
-实际上最后取的最佳方向就是深度最大的结果。
-
 
 # sqlite3 schema
 import sqlite3
@@ -94,5 +80,24 @@ with closing(sqlite3.connect(dbname)) as conn:
                         )'''
     c.execute(create_table)
 
+
+
+# 算法概述
+先根据search里面的eval函数算出score的分数
+Score分数包括4个部分
+每个部分算出来以后，会有一个格局评价---启发指标采用了加权策略
+算出一个格局评价的值然后返回
+
+然后比较score分数，找到最大的值
+
+返回后在iterativeDeep里面判断
+如果move方向是-1 就退出 然后返回上次best值为此次查询的最佳方向
+如果move不是-1 就把本次newbest保存给best然后depth加1（深度加1）
+深度越大 计算量越多，positions的值越大。
+实际上最后取的最佳方向就是深度最大的结果。
+
+# 阶段总结
+迭代算法分析过于复杂
+暂时先放一下
 
 ```
